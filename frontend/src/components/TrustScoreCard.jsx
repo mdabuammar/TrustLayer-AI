@@ -1,137 +1,106 @@
 import React from 'react';
-import { motion } from 'motion/react';
-import { ShieldCheck, ShieldAlert, Shield } from 'lucide-react';
+import { Shield, ShieldCheck, ShieldAlert } from 'lucide-react';
 
 export default function TrustScoreCard({ score, riskLevel }) {
-  const getRiskColor = (level) => {
+  const getRiskColorClass = (level) => {
     switch (level.toLowerCase()) {
       case 'low':
-        return 'rgb(16, 185, 129)'; // Emerald
+        return 'text-accent-emerald bg-accent-emerald/5 border-accent-emerald/20';
       case 'medium':
-        return 'rgb(245, 158, 11)'; // Amber
+        return 'text-accent-amber bg-accent-amber/5 border-accent-amber/20';
       case 'high':
-        return 'rgb(244, 63, 94)'; // Rose
+        return 'text-accent-red bg-accent-red/5 border-accent-red/20';
       default:
-        return 'rgb(148, 163, 184)';
+        return 'text-zinc-400 bg-zinc-900 border-zinc-800';
     }
   };
 
-  const getRiskBgColor = (level) => {
+  const getProgressBarColorClass = (level) => {
     switch (level.toLowerCase()) {
       case 'low':
-        return 'rgba(16, 185, 129, 0.06)';
+        return 'bg-accent-emerald';
       case 'medium':
-        return 'rgba(245, 158, 11, 0.06)';
+        return 'bg-accent-amber';
       case 'high':
-        return 'rgba(244, 63, 94, 0.06)';
+        return 'bg-accent-red';
       default:
-        return 'rgba(255, 255, 255, 0.03)';
+        return 'bg-zinc-700';
     }
   };
 
   const getExplanation = (level, scoreVal) => {
     if (scoreVal === 50 && level.toLowerCase() === 'low') {
-      return "The model declined to answer due to insufficient text evidence. This refusal is highly trusted, representing low hallucination risk.";
+      return "Document refusal triggered: Insufficient evidence in uploaded texts. No unsupported facts were generated.";
     }
     if (scoreVal >= 70) {
-      return "Strong credibility. The answer has high semantic overlap with multiple verified text passages in the document.";
+      return "Strong credibility match. The output matches multiple independent passages in the document.";
     }
     if (scoreVal >= 40) {
-      return "Moderate credibility. The answer aligns with parts of the source text, but check for potential extrapolations or assumptions.";
+      return "Moderate credibility. The output aligns partially, but contains minor terminological additions.";
     }
-    return "High hallucination danger. The generated answer diverges significantly from the retrieved context source blocks.";
+    return "High hallucination risk. Output contains unsupported keywords and lacks substantial matching source text.";
   };
 
-  const riskColor = getRiskColor(riskLevel);
-  const riskBg = getRiskBgColor(riskLevel);
-  
-  // Circle SVG metrics
-  const radius = 60;
-  const strokeWidth = 6;
-  const normalizedRadius = radius - strokeWidth * 2;
-  const circumference = normalizedRadius * 2 * Math.PI;
-  const strokeDashoffset = circumference - (score / 100) * circumference;
-
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="glass-panel rounded-3xl p-6 flex flex-col items-center justify-between text-center gap-6 relative overflow-hidden min-h-[340px]"
-    >
-      <div className="w-full flex items-center justify-between border-b border-white/5 pb-3">
-        <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase flex items-center gap-1.5">
-          <Shield className="w-3.5 h-3.5 text-slate-500" /> Trust Telemetry
-        </span>
-        <span className="w-1.5 h-1.5 rounded-full animate-ping" style={{ backgroundColor: riskColor }} />
-      </div>
-
-      {/* SVG Radial Gauge */}
-      <div className="relative w-36 h-36 flex items-center justify-center">
-        <svg
-          height="144"
-          width="144"
-          className="-rotate-90 origin-center"
-        >
-          {/* Background Ring */}
-          <circle
-            stroke="rgba(255, 255, 255, 0.03)"
-            fill="transparent"
-            strokeWidth={strokeWidth}
-            r={normalizedRadius}
-            cx="72"
-            cy="72"
-          />
-          {/* Active Progress Ring */}
-          <motion.circle
-            stroke={riskColor}
-            fill="transparent"
-            strokeWidth={strokeWidth}
-            strokeDasharray={circumference}
-            initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            r={normalizedRadius}
-            cx="72"
-            cy="72"
-            strokeLinecap="round"
-          />
-        </svg>
+    <div className="w-full border border-border-subtle bg-bg-dark rounded-lg p-5">
+      <div className="space-y-5">
         
-        {/* Absolute Numeric Display */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-3xl font-extrabold font-mono text-white tracking-tighter leading-none">
-            {score}
+        {/* Title block */}
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+          <span className="text-[9px] font-mono uppercase tracking-widest text-zinc-500 flex items-center gap-1.5">
+            <Shield className="w-3.5 h-3.5 text-zinc-650" /> Trust Telemetry
           </span>
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mt-1">
-            Percent
+          <span className={`text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${getRiskColorClass(riskLevel)}`}>
+            {riskLevel} Risk
           </span>
         </div>
-      </div>
 
-      {/* Risk badge & Details */}
-      <div className="space-y-4 w-full">
-        <div 
-          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase border"
-          style={{ 
-            backgroundColor: riskBg, 
-            borderColor: `${riskColor}25`, 
-            color: riskColor,
-            boxShadow: `0 0 15px ${riskColor}05`
-          }}
-        >
-          {riskLevel.toLowerCase() === 'low' ? (
-            <ShieldCheck className="w-3.5 h-3.5" />
-          ) : (
-            <ShieldAlert className="w-3.5 h-3.5" />
-          )}
-          <span>{riskLevel} Hallucination Risk</span>
+        {/* Metrics Grid */}
+        <div className="grid grid-cols-2 gap-4 py-2">
+          <div className="space-y-1">
+            <span className="text-[9px] font-mono uppercase tracking-tight text-zinc-500 block">
+              Confidence Score
+            </span>
+            <span className="text-3xl font-semibold font-mono tracking-tight text-zinc-100">
+              {score}%
+            </span>
+          </div>
+
+          <div className="space-y-1 flex flex-col justify-end items-end">
+            <span className="text-[9px] font-mono uppercase tracking-tight text-zinc-500 block w-full text-right">
+              Assessment
+            </span>
+            <div className="flex items-center gap-1 mt-1 text-zinc-300 text-xs font-mono">
+              {riskLevel.toLowerCase() === 'low' ? (
+                <ShieldCheck className="w-4 h-4 text-accent-emerald" />
+              ) : (
+                <ShieldAlert className="w-4 h-4 text-accent-amber" />
+              )}
+              <span className="font-semibold text-zinc-200">Verified</span>
+            </div>
+          </div>
         </div>
 
-        <p className="text-xs text-slate-400 font-sans leading-relaxed px-2">
+        {/* Flat Progress Bar */}
+        <div className="space-y-1">
+          <div className="w-full h-1.5 rounded-full bg-zinc-900 overflow-hidden border border-zinc-850">
+            <div 
+              className={`h-full rounded-full transition-all duration-500 ${getProgressBarColorClass(riskLevel)}`}
+              style={{ width: `${score}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between text-[8px] font-mono text-zinc-600">
+            <span>0% (UNVERIFIED)</span>
+            <span>100% (ALIGNED)</span>
+          </div>
+        </div>
+
+        {/* Analysis Explanation */}
+        <p className="text-[11px] text-zinc-400 font-mono leading-relaxed pt-1">
           {getExplanation(riskLevel, score)}
         </p>
+
       </div>
-    </motion.div>
+    </div>
   );
 }
