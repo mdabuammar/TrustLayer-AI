@@ -82,7 +82,7 @@ def generate_answer(question: str, context_chunks: list[dict]) -> str:
         
         answer = response.choices[0].message.content
         if not answer:
-            raise LLMAPIError("Received an empty response from OpenRouter.")
+            raise LLMAPIError(f"Received an empty response from OpenRouter. Raw response object: {repr(response)}")
             
         return answer.strip()
         
