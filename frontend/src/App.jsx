@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Terminal, Activity, ShieldCheck, HelpCircle } from 'lucide-react';
+import { Terminal, Activity, ShieldAlert } from 'lucide-react';
 import Header from './components/Header';
 import UploadBox from './components/UploadBox';
 import QuestionBox from './components/QuestionBox';
@@ -46,62 +46,39 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-deep relative overflow-hidden flex flex-col pb-16">
-      {/* Cinematic Ambient Background Mesh Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-brand-violet/10 rounded-full blur-[160px] animate-pulse-slow pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-brand-cyan/5 rounded-full blur-[160px] animate-pulse-slow pointer-events-none" />
-      <div className="absolute top-[40%] left-[60%] w-[40%] h-[40%] bg-brand-pink/5 rounded-full blur-[140px] pointer-events-none" />
-
-      {/* Floating Dock Navigation */}
+    <div className="min-h-screen bg-bg-deep flex flex-col pb-16">
+      {/* Enterprise Top Header Bar */}
       <Header currentFile={currentFile} totalChunks={totalChunks} />
 
-      <main className="max-w-6xl w-full mx-auto px-4 mt-8 flex-grow flex flex-col justify-start gap-8 z-20">
+      <main className="max-w-6xl w-full mx-auto px-4 mt-8 flex-grow flex flex-col justify-start gap-6 z-20">
         <AnimatePresence mode="wait">
           {!currentFile ? (
-            /* HERO / ONSBOARDING VIEW */
+            /* HERO / ONBOARDING VIEW */
             <motion.div 
               key="hero"
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto py-12 space-y-10"
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col items-center justify-center text-center max-w-2xl mx-auto py-20 space-y-8"
             >
-              {/* Pulsing visual element */}
-              <motion.div 
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="w-16 h-16 rounded-3xl bg-white/[0.02] border border-white/5 flex items-center justify-center shadow-2xl relative"
-              >
-                <div className="absolute inset-0 bg-brand-violet/20 rounded-3xl blur-xl" />
-                <Sparkles className="w-6 h-6 text-brand-violet relative" />
-              </motion.div>
-
-              <div className="space-y-4">
-                <motion.h1 
-                  initial={{ opacity: 0, filter: 'blur(8px)' }}
-                  animate={{ opacity: 1, filter: 'blur(0px)' }}
-                  transition={{ delay: 0.2, duration: 0.8 }}
-                  className="text-4xl sm:text-6xl font-black tracking-tight leading-none bg-gradient-to-b from-white via-slate-100 to-slate-500 bg-clip-text text-transparent font-sans"
-                >
-                  Verify LLM Truth <br />
-                  <span className="bg-gradient-to-r from-brand-violet via-brand-pink to-brand-cyan bg-clip-text text-transparent text-glow-violet">
-                    In Real Time
-                  </span>
-                </motion.h1>
-                
-                <motion.p 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4, duration: 0.8 }}
-                  className="text-md sm:text-lg text-slate-400 font-sans max-w-xl mx-auto leading-relaxed"
-                >
-                  TrustLayer AI enforces context alignment, matches semantic retrieval vectors inside ChromaDB, and flags hallucinated responses on CPU.
-                </motion.p>
+              {/* Minimal Terminal Icon Header */}
+              <div className="w-12 h-12 rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center shadow-sm">
+                <Terminal className="w-5 h-5 text-zinc-400" />
               </div>
 
-              {/* Upload Dropzone Placement */}
-              <div className="w-full max-w-xl">
+              <div className="space-y-2">
+                <h1 className="text-3xl sm:text-5xl font-semibold tracking-tight text-zinc-100 font-sans">
+                  TrustLayer AI
+                </h1>
+                
+                <p className="text-xs sm:text-sm text-zinc-400 font-mono max-w-md mx-auto leading-relaxed">
+                  Real-time contextual truth alignment and hallucination evaluation for local retrieval-augmented pipelines.
+                </p>
+              </div>
+
+              {/* Upload Dropzone */}
+              <div className="w-full max-w-md pt-2">
                 <UploadBox onUploadSuccess={handleUploadSuccess} />
               </div>
             </motion.div>
@@ -111,13 +88,12 @@ export default function App() {
               key="workspace"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start w-full"
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start w-full"
             >
-              {/* Left Column: QA, Inputs, Outputs */}
-              <div className="lg:col-span-3 space-y-6">
-                {/* Micro Uploader (Allows replacing pdf) */}
-                <div className="opacity-70 hover:opacity-100 transition-opacity duration-300">
+              {/* Left Column: QA inputs and results */}
+              <div className="lg:col-span-3 space-y-5">
+                <div className="opacity-80 hover:opacity-100 transition-opacity duration-150">
                   <UploadBox onUploadSuccess={handleUploadSuccess} />
                 </div>
                 
@@ -127,23 +103,22 @@ export default function App() {
                   loading={askLoading} 
                 />
 
-                {/* Loading state skeleton */}
+                {/* Loading state indicator */}
                 <AnimatePresence>
                   {askLoading && (
                     <motion.div 
-                      initial={{ opacity: 0, scale: 0.98 }}
+                      initial={{ opacity: 0, scale: 0.99 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0 }}
-                      className="glass-panel rounded-3xl p-8 flex flex-col items-center justify-center text-center gap-6 min-h-[220px] relative overflow-hidden"
+                      className="border border-border-subtle bg-bg-dark rounded-lg p-6 flex flex-col items-center justify-center text-center gap-4 min-h-[180px] relative overflow-hidden"
                     >
-                      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-brand-violet to-brand-cyan animate-pulse" />
-                      <div className="w-10 h-10 rounded-full border-2 border-brand-violet/20 border-t-brand-violet animate-spin" />
-                      <div className="space-y-2">
-                        <p className="font-semibold text-slate-200 text-sm font-sans">
-                          Querying ChromaDB & OpenRouter...
+                      <div className="w-5 h-5 rounded-full border border-zinc-800 border-t-zinc-400 animate-spin" />
+                      <div className="space-y-1">
+                        <p className="font-semibold text-zinc-350 text-xs font-mono">
+                          QUERYING CHROMADB & OPENROUTER
                         </p>
-                        <p className="text-xs text-slate-500 font-mono max-w-[280px]">
-                          Computing lexical token overlaps and verifying cosine compliance matrices
+                        <p className="text-[10px] text-zinc-550 font-mono max-w-[280px]">
+                          Computing lexical token overlaps and verifying semantic similarity matrices
                         </p>
                       </div>
                     </motion.div>
@@ -156,23 +131,24 @@ export default function App() {
                     <motion.div 
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="p-4 rounded-2xl bg-brand-rose/5 border border-brand-rose/25 text-brand-rose text-xs font-sans flex items-start gap-3"
+                      className="p-3 rounded border border-accent-red/20 bg-accent-red/5 text-accent-red text-xs font-mono flex items-start gap-2.5"
                     >
-                      <ShieldCheck className="w-5 h-5 text-brand-rose shrink-0" />
+                      <ShieldAlert className="w-4 h-4 text-accent-red shrink-0 mt-0.5" />
                       <div>
-                        <span className="font-semibold">Query Execution Error: </span> {askError}
+                        <span className="font-semibold uppercase tracking-wider text-[10px] block mb-1">Execution Fail</span>
+                        {askError}
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                {/* Main QA Response display */}
+                {/* Main QA Answer Display */}
                 <AnimatePresence>
                   {result && (
                     <motion.div
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="space-y-6"
+                      className="space-y-5"
                     >
                       <AnswerCard 
                         question={result.question} 
@@ -183,8 +159,8 @@ export default function App() {
                 </AnimatePresence>
               </div>
 
-              {/* Right Column: Telemetry & Citation accordions */}
-              <div className="lg:col-span-2 space-y-6">
+              {/* Right Column: Telemetry & Citations */}
+              <div className="lg:col-span-2 space-y-5">
                 <AnimatePresence mode="wait">
                   {!result ? (
                     /* Inactive telemetry panel placeholder */
@@ -193,38 +169,35 @@ export default function App() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="glass-panel rounded-3xl p-8 flex flex-col items-center justify-center text-center gap-4 min-h-[300px]"
+                      className="border border-border-subtle bg-bg-dark rounded-lg p-8 flex flex-col items-center justify-center text-center gap-3 min-h-[280px]"
                     >
-                      <div className="w-12 h-12 rounded-2xl bg-white/[0.01] border border-white/5 flex items-center justify-center text-slate-600">
-                        <Activity className="w-5 h-5" />
+                      <div className="w-9 h-9 rounded bg-zinc-950 border border-zinc-850 flex items-center justify-center text-zinc-500">
+                        <Activity className="w-4.5 h-4.5" />
                       </div>
                       <div className="space-y-1">
-                        <h4 className="text-sm font-semibold text-slate-300 font-sans">Verification Standby</h4>
-                        <p className="text-xs text-slate-500 font-sans max-w-[200px] leading-relaxed mx-auto">
-                          Submit a query to enable vector search matching and truth metric calculations
+                        <h4 className="text-xs font-semibold text-zinc-300 font-mono">Verification Standby</h4>
+                        <p className="text-[10px] text-zinc-500 font-mono max-w-[200px] leading-relaxed mx-auto">
+                          Submit a query query to trigger automatic vector match validation and truth telemetry.
                         </p>
                       </div>
                     </motion.div>
                   ) : (
-                    /* Active telemetry metrics */
+                    /* Active telemetry metrics stack */
                     <motion.div 
                       key="telemetry-active"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="space-y-6"
+                      className="space-y-5"
                     >
-                      {/* Metric cards grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-6">
-                        <TrustScoreCard 
-                          score={result.trust_score} 
-                          riskLevel={result.risk_level} 
-                        />
-                        <WarningList 
-                          warnings={result.warnings} 
-                        />
-                      </div>
+                      <TrustScoreCard 
+                        score={result.trust_score} 
+                        riskLevel={result.risk_level} 
+                      />
+                      
+                      <WarningList 
+                        warnings={result.warnings} 
+                      />
 
-                      {/* Source grounding chunks list */}
                       <CitationList 
                         retrievedChunks={result.retrieved_chunks} 
                       />
