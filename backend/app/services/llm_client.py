@@ -27,12 +27,29 @@ def generate_answer(question: str, context_chunks: list[dict]) -> str:
             "Please configure a valid API key in your .env file."
         )
         
-    model = os.getenv("OPENROUTER_MODEL", "openrouter/free")
+    preferred_model = os.getenv("OPENROUTER_MODEL", "openrouter/free")
     
-    # Initialize the client pointing to OpenRouter
+    # Define a robust list of models to try, starting with user preference,
+    # then falling back to known-stable active free models on OpenRouter.
+    models_to_try = [preferred_model]
+    fallback_pool = [
+        "google/gemma-4-31b-it:free",
+        "deepseek/deepseek-v4-flash:free",
+        "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "meta-llama/llama-3.3-70b-instruct:free",
+        "meta-llama/llama-3.2-3b-instruct:free",
+        "openrouter/free"
+    ]
+    for model_id in fallback_pool:
+        if model_id not in models_to_try:
+            models_to_try.append(model_id)
+            
+    # Initialize the client pointing to OpenRouter with a timeout and minimal retries
     client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
+        timeout=15.0,
+        max_retries=1
     )
     
     # If there is no context, return the required placeholder response directly
@@ -64,27 +81,41 @@ def generate_answer(question: str, context_chunks: list[dict]) -> str:
     
     user_prompt = f"Context:\n{context_text}\n\nQuestion: {question}"
     
-    try:
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.0,  # Factual and deterministic
-            max_tokens=500,
-            # Extra headers for OpenRouter rankings/logging if needed
-            extra_headers={
-                "HTTP-Referer": "https://github.com/TrustLayerAI",
-                "X-Title": "TrustLayer AI Backend"
-            }
-        )
-        
-        answer = response.choices[0].message.content
-        if not answer:
-            raise LLMAPIError(f"Received an empty response from OpenRouter. Raw response object: {repr(response)}")
+    last_error = None
+    for attempt_model in models_to_try:
+        try:
+            response = client.chat.completions.create(
+                model=attempt_model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.0,  # Factual and deterministic
+                max_tokens=1500,  # Increased to prevent reasoning truncation
+                extra_headers={
+                    "HTTP-Referer": "https://github.com/TrustLayerAI",
+                    "X-Title": "TrustLayer AI Backend"
+                }
+            )
             
-        return answer.strip()
-        
-    except Exception as e:
-        raise LLMAPIError(f"OpenRouter API call failed: {str(e)}")
+            choice = response.choices[0]
+            message = choice.message
+            answer = message.content
+            
+            # If the response content is empty but reasoning is present, we still need content.
+            # So treat empty content as an error to proceed to the next model in the fallback chain.
+            if not answer or not answer.strip():
+                reasoning = getattr(message, 'reasoning', None)
+                if not reasoning and hasattr(message, 'model_extra'):
+                    reasoning = message.model_extra.get('reasoning')
+                raise LLMAPIError(f"Model {attempt_model} returned empty content (reasoning available: {bool(reasoning)}).")
+                
+            return answer.strip()
+            
+        except Exception as e:
+            last_error = e
+            # Print/log the exception and try the next model
+            print(f"OpenRouter model {attempt_model} call failed: {str(e)}")
+            continue
+            
+    raise LLMAPIError(f"All attempted OpenRouter models failed. Last error: {str(last_error)}")
