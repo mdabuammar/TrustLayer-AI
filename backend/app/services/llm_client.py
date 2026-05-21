@@ -27,7 +27,7 @@ def generate_answer(question: str, context_chunks: list[dict]) -> str:
             "Please configure a valid API key in your .env file."
         )
         
-    model = os.getenv("OPENROUTER_MODEL", "google/gemma-3-27b-it:free")
+    model = os.getenv("OPENROUTER_MODEL", "google/gemma-2-9b-it:free")
     
     # Initialize the client pointing to OpenRouter
     client = OpenAI(
