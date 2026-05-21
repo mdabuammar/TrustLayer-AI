@@ -1,0 +1,41 @@
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache & compiles
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Node.js dependencies
+node_modules/
+dist/
+.svelte-kit/
+.next/
+out/
+build/
+.eslintcache
+
+# Project secrets & configs
+.env
+.env.local
+.env.*.local
+
+# Database & vector store files
+backend/chroma_db/
+backend/data/uploads/
+data/uploads/
+chroma_db/
+
+# IDE / System files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+.gemini/
+antigravity-ide/
+C:\Users\Hp\.gemini/
