@@ -189,6 +189,3 @@ export default function UploadBox({ onUploadSuccess }) {
     </div>
   );
 }
-
-  );
-}
