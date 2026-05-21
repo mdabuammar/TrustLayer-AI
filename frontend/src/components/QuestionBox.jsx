@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Search, Sliders, ChevronRight, CornerDownLeft, Sparkles, MessageSquare } from 'lucide-react';
 
 export default function QuestionBox({ isDocumentUploaded, onAskQuestion, loading }) {
   const [question, setQuestion] = useState("");
@@ -6,7 +8,7 @@ export default function QuestionBox({ isDocumentUploaded, onAskQuestion, loading
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!question.trim() || loading) return;
+    if (!question.trim() || loading || !isDocumentUploaded) return;
     onAskQuestion(question, topK);
   };
 
@@ -21,200 +23,125 @@ export default function QuestionBox({ isDocumentUploaded, onAskQuestion, loading
   ];
 
   return (
-    <div className="card" style={{
-      width: '100%',
-      marginBottom: '2rem',
-      opacity: isDocumentUploaded ? 1 : 0.6,
-      pointerEvents: isDocumentUploaded ? 'auto' : 'none',
-      transition: 'opacity 0.3s ease'
-    }}>
-      <h2 style={{
-        fontSize: '1.25rem',
-        marginBottom: '1rem',
-        textAlign: 'left',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem'
-      }}>
-        <span style={{ color: 'var(--accent-primary)' }}>2.</span> Ask the RAG Engine
-      </h2>
-
-      {!isDocumentUploaded && (
-        <p style={{
-          textAlign: 'left',
-          fontSize: '0.9rem',
-          color: 'var(--color-warning)',
-          marginBottom: '1rem',
-          background: 'rgba(245, 158, 11, 0.05)',
-          padding: '0.5rem 0.75rem',
-          borderRadius: '6px',
-          border: '1px solid rgba(245, 158, 11, 0.15)'
-        }}>
-          ⚠️ Upload a reference PDF above to unlock question answering.
-        </p>
-      )}
-
-      <form onSubmit={handleSubmit} style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem'
-      }}>
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.5rem',
-          textAlign: 'left'
-        }}>
-          <label style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-            Your Question:
-          </label>
-          <div style={{
-            display: 'flex',
-            gap: '0.75rem',
-            position: 'relative'
-          }}>
-            <input 
-              type="text"
-              placeholder="e.g., Explain the security protocols described in section 4..."
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              disabled={!isDocumentUploaded || loading}
-              style={{
-                flexGrow: 1,
-                padding: '0.85rem 1rem',
-                borderRadius: 'var(--radius-sm)',
-                backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                border: '1px solid var(--border-color)',
-                color: '#ffffff',
-                fontSize: '1rem',
-                outline: 'none',
-                transition: 'border-color 0.2s ease'
-              }}
-              onFocus={(e) => e.target.style.borderColor = 'var(--accent-primary)'}
-              onBlur={(e) => e.target.style.borderColor = 'var(--border-color)'}
-            />
-            <button
-              type="submit"
-              disabled={!isDocumentUploaded || loading || !question.trim()}
-              style={{
-                padding: '0 1.5rem',
-                borderRadius: 'var(--radius-sm)',
-                background: 'var(--accent-gradient)',
-                border: 'none',
-                color: '#ffffff',
-                fontWeight: '600',
-                cursor: 'pointer',
-                opacity: (!isDocumentUploaded || loading || !question.trim()) ? 0.5 : 1,
-                transition: 'all 0.2s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                minWidth: '120px',
-                boxShadow: (!isDocumentUploaded || loading || !question.trim()) ? 'none' : '0 4px 14px rgba(139, 92, 246, 0.3)'
-              }}
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.15, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full relative"
+    >
+      <div className={`glass-panel glass-panel-hover rounded-3xl p-8 transition-all duration-500 relative ${
+        !isDocumentUploaded ? "opacity-50" : "opacity-100"
+      }`}>
+        {/* Absolute locked backdrop helper */}
+        {!isDocumentUploaded && (
+          <div className="absolute inset-0 bg-bg-deep/10 backdrop-blur-[2px] rounded-3xl z-10 flex flex-col items-center justify-center p-6 text-center">
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: [0.9, 1.02, 0.9] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+              className="px-4 py-2 rounded-full bg-brand-amber/10 border border-brand-amber/30 text-brand-amber text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.05)]"
             >
-              {loading ? (
-                <div style={{
-                  width: '18px',
-                  height: '18px',
-                  border: '2px solid rgba(255,255,255,0.2)',
-                  borderTop: '2px solid #ffffff',
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite'
-                }}></div>
-              ) : 'Submit'}
-            </button>
-          </div>
-        </div>
-
-        {/* Top_K Slider Configuration */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          background: 'rgba(255, 255, 255, 0.02)',
-          padding: '0.75rem 1rem',
-          borderRadius: 'var(--radius-sm)',
-          border: '1px solid rgba(255, 255, 255, 0.03)',
-          textAlign: 'left'
-        }}>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '0.875rem', fontWeight: '500' }}>Context Documents (top_k)</span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>How many relevant chunks to retrieve from ChromaDB</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <input 
-              type="range" 
-              min="1" 
-              max="15" 
-              value={topK} 
-              onChange={(e) => setTopK(parseInt(e.target.value))}
-              disabled={loading}
-              style={{
-                accentColor: 'var(--accent-primary)',
-                cursor: 'pointer'
-              }}
-            />
-            <span style={{
-              fontFamily: 'var(--font-mono)',
-              background: 'rgba(255,255,255,0.06)',
-              padding: '0.2rem 0.5rem',
-              borderRadius: '4px',
-              fontSize: '0.9rem',
-              minWidth: '24px',
-              textAlign: 'center'
-            }}>{topK}</span>
-          </div>
-        </div>
-
-        {/* Suggestion tags */}
-        {isDocumentUploaded && suggestions.length > 0 && (
-          <div style={{
-            textAlign: 'left',
-            marginTop: '0.25rem'
-          }}>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginRight: '0.5rem' }}>
-              Suggested queries:
-            </span>
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '0.5rem',
-              marginTop: '0.35rem'
-            }}>
-              {suggestions.map((text, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleSuggestionClick(text)}
-                  disabled={loading}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    border: '1px solid var(--border-color)',
-                    color: 'var(--text-secondary)',
-                    borderRadius: '50px',
-                    padding: '0.35rem 0.85rem',
-                    fontSize: '0.8rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'rgba(255,255,255,0.08)';
-                    e.target.style.borderColor = 'rgba(255,255,255,0.2)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'rgba(255,255,255,0.04)';
-                    e.target.style.borderColor = 'var(--border-color)';
-                  }}
-                >
-                  {text}
-                </button>
-              ))}
-            </div>
+              Awaiting Document Ingestion
+            </motion.div>
           </div>
         )}
-      </form>
-    </div>
+
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono text-brand-cyan font-semibold tracking-wider uppercase px-2.5 py-1 rounded bg-brand-cyan/10 border border-brand-cyan/20">
+              Step 02
+            </span>
+            <h2 className="text-lg font-sans font-bold text-slate-200">
+              Verify with QA Agent
+            </h2>
+          </div>
+          <span className="text-xs text-slate-500 font-mono flex items-center gap-1">
+            <MessageSquare className="w-3.5 h-3.5 text-brand-violet" /> Prompt: Context Enforced
+          </span>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-xs font-mono text-slate-400 uppercase tracking-widest block">
+              Enter Verification Query
+            </label>
+            <div className="relative flex items-center">
+              <input 
+                type="text"
+                placeholder={isDocumentUploaded ? "Ask a question about the document... (Press Enter ↵)" : "Upload PDF to enable querying..."}
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                disabled={!isDocumentUploaded || loading}
+                className="w-full pl-5 pr-14 py-4 rounded-xl bg-slate-950/60 border border-slate-800 text-slate-100 text-sm font-sans placeholder-slate-600 focus:outline-none focus:border-brand-violet focus:ring-1 focus:ring-brand-violet/50 focus:shadow-[0_0_20px_rgba(139,92,246,0.15)] transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+              />
+              <div className="absolute right-3 flex items-center gap-2">
+                <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-mono text-slate-600 bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded">
+                  <CornerDownLeft className="w-3 h-3 text-slate-600" />
+                </kbd>
+                <button
+                  type="submit"
+                  disabled={!isDocumentUploaded || loading || !question.trim()}
+                  className="p-2 rounded-lg bg-gradient-to-tr from-brand-violet to-brand-pink text-white disabled:from-slate-900 disabled:to-slate-900 disabled:text-slate-700 disabled:border-slate-800 border border-white/5 transition-all duration-300 disabled:shadow-none hover:shadow-lg hover:shadow-brand-violet/20 hover:scale-105 active:scale-95 disabled:scale-100 shrink-0 cursor-pointer"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Top_K Context Range Slider */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-white/[0.01] border border-white/[0.03]">
+            <div className="space-y-0.5">
+              <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5 font-sans">
+                <Sliders className="w-3.5 h-3.5 text-brand-cyan" /> Retrieval Window Width (top_k)
+              </span>
+              <p className="text-[10px] text-slate-500 font-mono">
+                Number of relevant context blocks to extract from ChromaDB
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <input 
+                type="range" 
+                min="1" 
+                max="15" 
+                value={topK} 
+                onChange={(e) => setTopK(parseInt(e.target.value))}
+                disabled={loading || !isDocumentUploaded}
+                className="w-32 accent-brand-cyan hover:accent-brand-violet cursor-pointer transition-colors"
+              />
+              <span className="font-mono text-xs text-brand-cyan bg-brand-cyan/10 px-2.5 py-1 border border-brand-cyan/20 rounded font-semibold min-w-8 text-center">
+                {topK}
+              </span>
+            </div>
+          </div>
+
+          {/* Suggested Queries */}
+          {isDocumentUploaded && (
+            <div className="space-y-2">
+              <span className="text-[10px] text-slate-500 uppercase tracking-widest font-mono">
+                Suggested Verification Vectors
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {suggestions.map((text, idx) => (
+                  <motion.button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSuggestionClick(text)}
+                    disabled={loading}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="bg-slate-900 hover:bg-slate-800/80 text-slate-400 hover:text-slate-200 border border-slate-800 hover:border-slate-700/60 rounded-full px-3.5 py-1.5 text-xs transition-all duration-300 font-sans cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Sparkles className="w-3 h-3 text-brand-violet" />
+                    {text}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          )}
+        </form>
+      </div>
+    </motion.div>
   );
 }
